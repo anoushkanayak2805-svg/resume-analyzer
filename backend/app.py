@@ -1,6 +1,7 @@
 from services.parser import extract_skills
 from services.matcher import match_resume_job
 from services.scorer import calculate_ats_score   # ✅ ADD THIS
+from services.suggestions import generate_suggestions
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pdfplumber
@@ -67,6 +68,20 @@ def ats():
         "skills": skills,
         "match_score": round(match_score, 2),
         "ats_score": ats_score
+    })
+@app.route("/suggest", methods=["POST"])
+def suggest():
+    data = request.json
+
+    resume_text = data["resume"]
+    job_desc = data["job"]
+
+    skills = extract_skills(resume_text)
+    suggestions = generate_suggestions(skills, job_desc)
+
+    return jsonify({
+        "skills": skills,
+        "suggestions": suggestions
     })
 
 
