@@ -1,4 +1,5 @@
 from services.parser import extract_skills
+from services.matcher import match_resume_job   # ✅ ADD THIS
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pdfplumber
@@ -31,6 +32,21 @@ def analyze():
 
     return jsonify({
         "skills": skills
+    })
+
+
+# ✅ ADD MATCH ROUTE HERE (ABOVE app.run)
+@app.route("/match", methods=["POST"])
+def match():
+    data = request.json
+
+    resume_text = data["resume"]
+    job_desc = data["job"]
+
+    score = match_resume_job(resume_text, job_desc)
+
+    return jsonify({
+        "match_score": round(score, 2)
     })
 
 
