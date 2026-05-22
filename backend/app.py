@@ -1,3 +1,4 @@
+from services.parser import extract_skills
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pdfplumber
@@ -19,6 +20,19 @@ def upload_resume():
             text += page.extract_text()
 
     return jsonify({"text": text})
+
+
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    data = request.json
+    text = data["text"]
+
+    skills = extract_skills(text)
+
+    return jsonify({
+        "skills": skills
+    })
+
 
 if __name__ == "__main__":
     app.run(debug=True)
