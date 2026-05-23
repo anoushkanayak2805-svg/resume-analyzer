@@ -8,6 +8,7 @@ function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [file, setFile] = useState(null);
   const [history, setHistory] = useState([]);
+  const [aiFeedback, setAiFeedback] = useState(""); // ✅ NEW
 
   const uploadFile = async () => {
     if (!file) return alert("Upload file first");
@@ -54,6 +55,20 @@ function App() {
     setHistory(data);
   };
 
+  // ✅ AI FUNCTION (INSIDE COMPONENT)
+  const getAI = async () => {
+    const res = await fetch("http://127.0.0.1:5000/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ resume: resumeText, job }),
+    });
+
+    const data = await res.json();
+    setAiFeedback(data.feedback);
+  };
+
   return (
     <div className="container">
       <h1 className="title">🚀 AI Resume Analyzer</h1>
@@ -77,6 +92,7 @@ function App() {
         <div className="btn-group">
           <button onClick={analyze}>Analyze</button>
           <button onClick={fetchHistory}>History</button>
+          <button onClick={getAI}>🤖 AI Improve</button> {/* ✅ NEW */}
         </div>
       </div>
 
@@ -107,6 +123,14 @@ function App() {
               <li key={i}>{s}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* ✅ AI OUTPUT */}
+      {aiFeedback && (
+        <div className="card">
+          <h2>🤖 AI Feedback</h2>
+          <pre>{aiFeedback}</pre>
         </div>
       )}
 
