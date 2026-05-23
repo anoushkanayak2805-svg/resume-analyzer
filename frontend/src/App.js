@@ -1,120 +1,128 @@
 import React, { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [resume, setResume] = useState("");
+  const [resumeText, setResumeText] = useState("");
   const [job, setJob] = useState("");
   const [result, setResult] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [file, setFile] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  const uploadFile = async () => {
+    if (!file) return alert("Upload file first");
+
+    const formData = new FormData();
+    formData.append("resume", file);
+
+    const res = await fetch("http://127.0.0.1:5000/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    setResumeText(data.text);
+  };
 
   const analyze = async () => {
-    const response = await fetch("http://127.0.0.1:5000/ats", {
+    const res = await fetch("http://127.0.0.1:5000/ats", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ resume, job }),
+      body: JSON.stringify({ resume: resumeText, job }),
     });
 
-    const data = await response.json();
+    const data = await res.json();
     setResult(data);
+
+    const sug = await fetch("http://127.0.0.1:5000/suggest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ resume: resumeText, job }),
+    });
+
+    const sugData = await sug.json();
+    setSuggestions(sugData.suggestions);
+  };
+
+  const fetchHistory = async () => {
+    const res = await fetch("http://127.0.0.1:5000/history");
+    const data = await res.json();
+    setHistory(data);
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>🤖 AI Resume Analyzer</h1>
+    <div className="container">
+      <h1 className="title">🚀 AI Resume Analyzer</h1>
 
-      <div style={styles.card}>
+      <div className="card">
+        <h2>Upload Resume</h2>
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+        <button onClick={uploadFile}>Upload PDF</button>
+
         <textarea
-          style={styles.textarea}
-          placeholder="Paste your resume here..."
-          onChange={(e) => setResume(e.target.value)}
+          placeholder="Resume text..."
+          value={resumeText}
+          onChange={(e) => setResumeText(e.target.value)}
         />
 
         <textarea
-          style={styles.textarea}
-          placeholder="Paste job description here..."
+          placeholder="Job description..."
           onChange={(e) => setJob(e.target.value)}
         />
 
-        <button style={styles.button} onClick={analyze}>
-          Analyze Resume
-        </button>
+        <div className="btn-group">
+          <button onClick={analyze}>Analyze</button>
+          <button onClick={fetchHistory}>History</button>
+        </div>
       </div>
 
       {result && (
-        <div style={styles.resultCard}>
+        <div className="result-card">
           <h2>📊 Results</h2>
-
-          <div style={styles.scoreBox}>
-            <h3>ATS Score</h3>
-            <p style={styles.bigText}>{result.ats_score}</p>
+          <div className="scores">
+            <div className="score-box">
+              <h3>ATS</h3>
+              <p>{result.ats_score}</p>
+            </div>
+            <div className="score-box">
+              <h3>Match</h3>
+              <p>{result.match_score}</p>
+            </div>
           </div>
 
-          <div style={styles.scoreBox}>
-            <h3>Match Score</h3>
-            <p style={styles.bigText}>{result.match_score}</p>
-          </div>
+          <h3>🧠 Skills</h3>
+          <p>{result.skills.join(", ")}</p>
+        </div>
+      )}
 
-          <div>
-            <h3>🧠 Skills Detected</h3>
-            <p>{result.skills.join(", ")}</p>
-          </div>
+      {suggestions.length > 0 && (
+        <div className="card">
+          <h2>🤖 Suggestions</h2>
+          <ul>
+            {suggestions.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <div className="card">
+          <h2>📜 History</h2>
+          {history.map((h, i) => (
+            <div key={i} className="history-item">
+              <p>ATS: {h.ats_score}</p>
+              <p>Match: {h.match_score}</p>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
-
-const styles = {
-  container: {
-    textAlign: "center",
-    padding: "30px",
-    backgroundColor: "#f4f6f8",
-    minHeight: "100vh",
-  },
-  title: {
-    marginBottom: "20px",
-  },
-  card: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-    maxWidth: "600px",
-    margin: "auto",
-  },
-  textarea: {
-    width: "100%",
-    height: "100px",
-    marginBottom: "10px",
-    padding: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px 20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  resultCard: {
-    marginTop: "30px",
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    maxWidth: "600px",
-    marginLeft: "auto",
-    marginRight: "auto",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-  },
-  scoreBox: {
-    marginBottom: "15px",
-  },
-  bigText: {
-    fontSize: "28px",
-    fontWeight: "bold",
-  },
-};
 
 export default App;
