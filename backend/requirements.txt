@@ -3,3 +3,4 @@ gunicorn==21.2.0
 numpy>=1.26.0
 setuptools>=68
 wheel
+spacy==3.7.2
