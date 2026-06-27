@@ -1,11 +1,5 @@
-Flask
-gunicorn
-
-numpy==1.24.4
-spacy==3.7.5
-thinc==8.2.5
-blis==0.7.11
-
-setuptools>=65
+Flask==2.3.3
+gunicorn==21.2.0
+numpy>=1.26.0
+setuptools>=68
 wheel
-pip>=24.0
