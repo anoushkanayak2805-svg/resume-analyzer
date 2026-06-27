@@ -1,2 +1,14 @@
+# Environment files
 .env
 backend/.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Node modules
+node_modules/
