@@ -1,61 +1,62 @@
-import os
-from openai import OpenAI
-
-
 def improve_resume(resume, job):
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    resume = resume.lower()
+    job = job.lower()
 
-    if not api_key:
-        return (
-            "❌ OpenAI API Key not found.\n\n"
-            "Create a .env file inside the backend folder and add:\n\n"
-            "OPENAI_API_KEY=your_api_key_here"
-        )
+    # -----------------------------
+    # Simple keyword extraction
+    # -----------------------------
+    job_keywords = set(job.split())
+    resume_words = set(resume.split())
 
-    client = OpenAI(api_key=api_key)
+    missing_keywords = list(job_keywords - resume_words)
+    matched_keywords = list(job_keywords & resume_words)
 
-    prompt = f"""
-You are an expert FAANG resume reviewer.
+    # -----------------------------
+    # Score calculation
+    # -----------------------------
+    if len(job_keywords) == 0:
+        match_score = 0
+    else:
+        match_score = round((len(matched_keywords) / len(job_keywords)) * 100, 2)
 
-Analyze the following resume against the job description.
+    # -----------------------------
+    # Suggestions Engine
+    # -----------------------------
+    suggestions = []
 
-Resume:
-{resume}
+    if match_score < 50:
+        suggestions.append("Improve keyword matching with job description")
 
-Job Description:
-{job}
+    if len(missing_keywords) > 0:
+        suggestions.append(f"Add these keywords: {', '.join(missing_keywords[:10])}")
 
-Return your answer in this format:
+    suggestions.append("Use strong action verbs: built, designed, implemented")
+    suggestions.append("Add measurable impact (%, numbers, results)")
+    suggestions.append("Improve resume formatting for ATS readability")
 
-1. ATS Score Improvement
-2. Missing Skills
-3. Resume Summary Improvement
-4. Weak Bullet Points
-5. Better Bullet Points
-6. Important Keywords to Add
-7. Projects to Add
-8. Certifications to Add
-9. Final Suggestions
+    # -----------------------------
+    # Final output (GPT-like format)
+    # -----------------------------
+    return f"""
+🤖 AI Resume Analysis (Free Mode)
+
+1. ATS Score Improvement:
+Your ATS score is {match_score}%
+
+2. Missing Skills:
+{', '.join(missing_keywords[:15])}
+
+3. Resume Summary Improvement:
+Make your summary more role-focused and add keywords from job description.
+
+4. Weak Areas:
+- Missing job-specific keywords
+- Lack of measurable achievements
+
+5. Suggestions:
+{chr(10).join(['- ' + s for s in suggestions])}
+
+6. Important Keywords:
+{', '.join(list(job_keywords)[:15])}
 """
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a senior FAANG recruiter and ATS expert."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0.5
-        )
-
-        return response.choices[0].message.content
-
-    except Exception as e:
-        return f"OpenAI Error: {str(e)}"

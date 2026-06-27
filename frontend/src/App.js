@@ -1,152 +1,88 @@
 import React, { useState } from "react";
-import "./App.css";
 
-function App() {
-  const [resumeText, setResumeText] = useState("");
+export default function App() {
+  const [messages, setMessages] = useState([]);
+  const [resume, setResume] = useState("");
   const [job, setJob] = useState("");
-  const [result, setResult] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
-  const [file, setFile] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [aiFeedback, setAiFeedback] = useState(""); // ✅ NEW
-
-  const uploadFile = async () => {
-    if (!file) return alert("Upload file first");
-
-    const formData = new FormData();
-    formData.append("resume", file);
-
-    const res = await fetch("http://127.0.0.1:5000/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-    setResumeText(data.text);
-  };
+  const [loading, setLoading] = useState(false);
 
   const analyze = async () => {
-    const res = await fetch("http://127.0.0.1:5000/ats", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ resume: resumeText, job }),
-    });
+    if (!resume || !job) return;
 
-    const data = await res.json();
-    setResult(data);
+    const userMsg = {
+      role: "user",
+      text: "Analyze my resume and give AI feedback 🚀",
+    };
 
-    const sug = await fetch("http://127.0.0.1:5000/suggest", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ resume: resumeText, job }),
-    });
+    setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
 
-    const sugData = await sug.json();
-    setSuggestions(sugData.suggestions);
-  };
-
-  const fetchHistory = async () => {
-    const res = await fetch("http://127.0.0.1:5000/history");
-    const data = await res.json();
-    setHistory(data);
-  };
-
-  // ✅ AI FUNCTION (INSIDE COMPONENT)
-  const getAI = async () => {
     const res = await fetch("http://127.0.0.1:5000/ai", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ resume: resumeText, job }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resume, job }),
     });
 
     const data = await res.json();
-    setAiFeedback(data.feedback);
+
+    const aiMsg = {
+      role: "ai",
+      text: data.feedback,
+    };
+
+    setMessages((prev) => [...prev, aiMsg]);
+    setLoading(false);
   };
 
   return (
-    <div className="container">
-      <h1 className="title">🚀 AI Resume Analyzer</h1>
+    <div className="flex h-screen bg-[#0b1220] text-white">
 
-      <div className="card">
-        <h2>Upload Resume</h2>
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-        <button onClick={uploadFile}>Upload PDF</button>
+      {/* Sidebar */}
+      <div className="w-72 bg-[#0f172a] border-r border-gray-800 p-4">
+        <h1 className="text-xl font-bold mb-4">🚀 Resume GPT</h1>
 
         <textarea
-          placeholder="Resume text..."
-          value={resumeText}
-          onChange={(e) => setResumeText(e.target.value)}
+          placeholder="Paste Resume"
+          className="w-full h-32 p-2 bg-[#111827] rounded mb-2"
+          onChange={(e) => setResume(e.target.value)}
         />
 
         <textarea
-          placeholder="Job description..."
+          placeholder="Paste Job Description"
+          className="w-full h-32 p-2 bg-[#111827] rounded"
           onChange={(e) => setJob(e.target.value)}
         />
 
-        <div className="btn-group">
-          <button onClick={analyze}>Analyze</button>
-          <button onClick={fetchHistory}>History</button>
-          <button onClick={getAI}>🤖 AI Improve</button> {/* ✅ NEW */}
-        </div>
+        <button
+          onClick={analyze}
+          className="w-full mt-3 bg-sky-600 p-2 rounded hover:bg-sky-500"
+        >
+          {loading ? "Analyzing..." : "Ask AI"}
+        </button>
       </div>
 
-      {result && (
-        <div className="result-card">
-          <h2>📊 Results</h2>
-          <div className="scores">
-            <div className="score-box">
-              <h3>ATS</h3>
-              <p>{result.ats_score}</p>
-            </div>
-            <div className="score-box">
-              <h3>Match</h3>
-              <p>{result.match_score}</p>
-            </div>
-          </div>
+      {/* Chat Area */}
+      <div className="flex-1 p-6 overflow-auto">
 
-          <h3>🧠 Skills</h3>
-          <p>{result.skills.join(", ")}</p>
-        </div>
-      )}
+        <h2 className="text-2xl font-bold mb-4">
+          AI Resume Chat Assistant
+        </h2>
 
-      {suggestions.length > 0 && (
-        <div className="card">
-          <h2>🤖 Suggestions</h2>
-          <ul>
-            {suggestions.map((s, i) => (
-              <li key={i}>{s}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* ✅ AI OUTPUT */}
-      {aiFeedback && (
-        <div className="card">
-          <h2>🤖 AI Feedback</h2>
-          <pre>{aiFeedback}</pre>
-        </div>
-      )}
-
-      {history.length > 0 && (
-        <div className="card">
-          <h2>📜 History</h2>
-          {history.map((h, i) => (
-            <div key={i} className="history-item">
-              <p>ATS: {h.ats_score}</p>
-              <p>Match: {h.match_score}</p>
+        <div className="space-y-4">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`p-4 rounded-lg max-w-2xl ${
+                msg.role === "user"
+                  ? "bg-sky-600 ml-auto"
+                  : "bg-gray-800"
+              }`}
+            >
+              {msg.text}
             </div>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
-
-export default App;
