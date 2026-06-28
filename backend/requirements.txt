@@ -1,6 +1,9 @@
 Flask==2.3.3
+Flask-Cors
 gunicorn==21.2.0
 numpy>=1.26.0
-setuptools>=68
-wheel
 spacy==3.7.2
+scikit-learn==1.5.1
+pdfplumber
+python-dotenv
+pymongo
