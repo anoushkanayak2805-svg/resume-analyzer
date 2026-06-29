@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+const API_URL = "https://resume-analyzer-57w9.onrender.com";
+
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [resume, setResume] = useState("");
@@ -7,7 +9,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   const analyze = async () => {
-    if (!resume || !job) return;
+    if (!resume || !job) {
+      alert("Please enter Resume and Job Description");
+      return;
+    }
 
     const userMsg = {
       role: "user",
@@ -17,39 +22,59 @@ export default function App() {
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
-    const res = await fetch("http://127.0.0.1:5000/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resume, job }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/ai`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resume,
+          job,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    const aiMsg = {
-      role: "ai",
-      text: data.feedback,
-    };
+      if (!res.ok) {
+        throw new Error(data.error || "Backend Error");
+      }
 
-    setMessages((prev) => [...prev, aiMsg]);
+      const aiMsg = {
+        role: "ai",
+        text: data.feedback,
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "❌ " + err.message,
+        },
+      ]);
+    }
+
     setLoading(false);
   };
 
   return (
     <div className="flex h-screen bg-[#0b1220] text-white">
-
-      {/* Sidebar */}
       <div className="w-72 bg-[#0f172a] border-r border-gray-800 p-4">
         <h1 className="text-xl font-bold mb-4">🚀 Resume GPT</h1>
 
         <textarea
           placeholder="Paste Resume"
           className="w-full h-32 p-2 bg-[#111827] rounded mb-2"
+          value={resume}
           onChange={(e) => setResume(e.target.value)}
         />
 
         <textarea
           placeholder="Paste Job Description"
           className="w-full h-32 p-2 bg-[#111827] rounded"
+          value={job}
           onChange={(e) => setJob(e.target.value)}
         />
 
@@ -61,9 +86,7 @@ export default function App() {
         </button>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 p-6 overflow-auto">
-
         <h2 className="text-2xl font-bold mb-4">
           AI Resume Chat Assistant
         </h2>
@@ -78,7 +101,7 @@ export default function App() {
                   : "bg-gray-800"
               }`}
             >
-              {msg.text}
+              <pre className="whitespace-pre-wrap">{msg.text}</pre>
             </div>
           ))}
         </div>
