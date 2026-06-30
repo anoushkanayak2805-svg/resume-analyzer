@@ -1,38 +1,36 @@
 import { FaCloudUploadAlt } from "react-icons/fa";
 
-export default function UploadCard({ onUpload }) {
+export default function UploadCard({ uploadResume }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
 
-      <div className="border-2 border-dashed border-blue-500 rounded-xl p-10 text-center">
+      <h2 className="text-2xl font-bold mb-5">
+        Upload Resume
+      </h2>
 
-        <FaCloudUploadAlt
-          size={70}
-          className="mx-auto text-blue-600"
-        />
+      <label className="cursor-pointer">
 
-        <h2 className="text-2xl font-bold mt-5">
-          Upload Resume
-        </h2>
+        <div className="border-2 border-dashed border-blue-500 rounded-xl p-12 text-center hover:bg-blue-50 transition">
 
-        <p className="text-gray-500 mt-2">
-          Upload your PDF Resume
-        </p>
-
-        <label className="mt-8 inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg cursor-pointer">
-
-          Choose PDF
-
-          <input
-            hidden
-            type="file"
-            accept=".pdf"
-            onChange={(e) => onUpload(e.target.files[0])}
+          <FaCloudUploadAlt
+            className="mx-auto text-blue-600"
+            size={60}
           />
 
-        </label>
+          <p className="mt-5 text-lg">
+            Click to Upload PDF
+          </p>
 
-      </div>
+        </div>
+
+        <input
+          hidden
+          type="file"
+          accept=".pdf"
+          onChange={(e) => uploadResume(e.target.files[0])}
+        />
+
+      </label>
 
     </div>
   );
