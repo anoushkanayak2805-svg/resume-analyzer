@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pdfplumber
 from dotenv import load_dotenv
+from datetime import datetime
 
 from services.parser import extract_skills
 from services.matcher import match_resume_job
@@ -152,7 +153,8 @@ def ats():
             "job": job,
             "skills": skills,
             "match_score": match_score,
-            "ats_score": ats_score
+            "ats_score": ats_score,
+            "created_at": datetime.now()
         })
 
         return jsonify({
@@ -221,6 +223,23 @@ def ai():
 
         result = improve_resume(resume, job)
 
+        collection.insert_one({
+
+            "resume": resume,
+            "job": job,
+
+            "ats_score": result.get("ats_score", 0),
+            "match_score": result.get("match_score", 0),
+
+            "matched_keywords": result.get("matched_keywords", []),
+            "missing_keywords": result.get("missing_keywords", []),
+
+            "suggestions": result.get("suggestions", []),
+
+            "created_at": datetime.now()
+
+        })
+
         return jsonify(result)
 
     except Exception as e:
@@ -241,10 +260,12 @@ def history():
     try:
 
         history = list(
+
             collection.find(
                 {},
                 {"_id": 0}
-            )
+            ).sort("created_at", -1)
+
         )
 
         return jsonify(history)

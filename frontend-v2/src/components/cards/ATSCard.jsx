@@ -13,31 +13,37 @@ export default function ATSCard({ score }) {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
 
-      <h2 className="text-xl font-bold mb-6 text-center">
+      <h2 className="text-xl font-bold text-center mb-4">
         ATS Score
       </h2>
 
-      <div className="w-40 h-40 mx-auto">
+      <div className="flex justify-center">
 
-        <CircularProgressbar
-          value={value}
-          text={`${value}%`}
-          styles={buildStyles({
-            textColor: "#111827",
-            pathColor: color,
-            trailColor: "#e5e7eb",
-            textSize: "18px",
-          })}
-        />
+        <div className="w-20 h-20 mx-auto">
+
+          <CircularProgressbar
+            value={value}
+            text={`${value}%`}
+            styles={buildStyles({
+              pathColor: color,
+              trailColor: "#E5E7EB",
+              textColor: "#111827",
+              textSize: "20px",
+            })}
+          />
+
+        </div>
 
       </div>
 
-      <p className="text-center mt-5 text-gray-600">
+      <p className="text-center mt-5 font-medium text-gray-600">
+
         {value >= 80
-          ? "Excellent Resume"
+          ? "Excellent"
           : value >= 60
-          ? "Good Resume"
+          ? "Good"
           : "Needs Improvement"}
+
       </p>
 
     </div>
