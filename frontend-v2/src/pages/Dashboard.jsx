@@ -42,18 +42,21 @@ export default function Dashboard() {
       setResumeText(res.data.text || "");
 
       alert("✅ Resume Uploaded Successfully");
-
     } catch (err) {
-      console.error(err);
+      console.error("UPLOAD ERROR:", err);
 
-      alert("❌ Upload Failed");
+      if (err.response) {
+        alert(
+          "Upload Error:\n" +
+            JSON.stringify(err.response.data, null, 2)
+        );
+      } else {
+        alert(err.message);
+      }
     }
   }
 
   async function analyzeResume() {
-
-    console.log("Current Resume Text:", resumeText);
-
     if (!resumeText || resumeText.trim() === "") {
       alert("Upload Resume First");
       return;
@@ -66,30 +69,38 @@ export default function Dashboard() {
     setLoading(true);
 
     try {
-
       const res = await api.post("/ai", {
         resume: resumeText,
         job,
       });
 
-      console.log("AI RESPONSE:", res.data);
+      console.log("========== AI RESPONSE ==========");
+      console.log(res.data);
+
+      alert(JSON.stringify(res.data, null, 2));
 
       const data = res.data;
 
-      setAtsScore(data.ats_score || 0);
-      setMatchScore(data.match_score || 0);
+      setAtsScore(Number(data.ats_score) || 0);
+      setMatchScore(Number(data.match_score) || 0);
 
-      setMatchedSkills(data.matched_keywords || []);
-      setMissingSkills(data.missing_keywords || []);
-      setSuggestions(data.suggestions || []);
-
+      setMatchedSkills(data.matched_keywords ?? []);
+      setMissingSkills(data.missing_keywords ?? []);
+      setSuggestions(data.suggestions ?? []);
     } catch (err) {
-      console.error(err);
+      console.error("ANALYSIS ERROR:", err);
 
-      alert("Analysis Failed");
+      if (err.response) {
+        alert(
+          "Backend Error:\n\n" +
+            JSON.stringify(err.response.data, null, 2)
+        );
+      } else {
+        alert(err.message);
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -101,7 +112,6 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-12 gap-8 p-8">
           <div className="col-span-4 space-y-6">
-
             <UploadCard uploadResume={uploadResume} />
 
             <button
@@ -115,11 +125,9 @@ export default function Dashboard() {
             <ATSCard score={atsScore} />
 
             <MatchCard score={matchScore} />
-
           </div>
 
           <div className="col-span-8 space-y-6">
-
             <PDFViewer pdf={pdfFile} />
 
             <SkillsCard
@@ -135,7 +143,6 @@ export default function Dashboard() {
             <SuggestionCard
               suggestions={suggestions}
             />
-
           </div>
         </div>
       </div>
