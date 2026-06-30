@@ -7,14 +7,14 @@ import {
 
 import api from "../../services/api";
 
-export default function History() {
+export default function History({ refresh }) {
 
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchHistory();
-  }, []);
+  fetchHistory();
+}, [refresh]);
 
   async function fetchHistory() {
 

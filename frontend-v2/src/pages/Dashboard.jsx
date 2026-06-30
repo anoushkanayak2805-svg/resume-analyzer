@@ -11,6 +11,7 @@ import MatchCard from "../components/cards/MatchCard";
 import SkillsCard from "../components/cards/SkillsCard";
 import SuggestionCard from "../components/cards/SuggestionCard";
 import StatsCard from "../components/cards/StatsCard";
+import History from "../components/history/History";
 
 import { downloadReport } from "../utils/report";
 
@@ -29,6 +30,8 @@ export default function Dashboard() {
   const [matchedSkills, setMatchedSkills] = useState([]);
   const [missingSkills, setMissingSkills] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
+
+  const [refreshHistory, setRefreshHistory] = useState(false);
 
   async function uploadResume(file) {
 
@@ -85,11 +88,17 @@ export default function Dashboard() {
       const data = res.data;
 
       setAtsScore(Number(data.ats_score) || 0);
+
       setMatchScore(Number(data.match_score) || 0);
 
       setMatchedSkills(data.matched_keywords || []);
+
       setMissingSkills(data.missing_keywords || []);
+
       setSuggestions(data.suggestions || []);
+
+      // Refresh History
+      setRefreshHistory(prev => !prev);
 
       alert("✅ Analysis Complete");
 
@@ -127,7 +136,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-12 gap-8 p-8">
 
-          {/* LEFT PANEL */}
+          {/* LEFT */}
 
           <div className="col-span-4 space-y-6">
 
@@ -136,12 +145,13 @@ export default function Dashboard() {
             <button
               onClick={analyzeResume}
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 font-bold transition"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 font-bold"
             >
               {loading ? "Analyzing..." : "Analyze Resume"}
             </button>
 
             <button
+              disabled={atsScore === 0}
               onClick={() =>
                 downloadReport(
                   atsScore,
@@ -151,7 +161,11 @@ export default function Dashboard() {
                   suggestions
                 )
               }
-              className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-4 font-bold transition"
+              className={`w-full rounded-xl py-4 font-bold ${
+                atsScore === 0
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : "bg-green-600 hover:bg-green-700 text-white"
+              }`}
             >
               📄 Download Report
             </button>
@@ -169,7 +183,7 @@ export default function Dashboard() {
               />
 
               <StatsCard
-                title="Missing"
+                title="Missing Skills"
                 value={missingSkills.length}
                 color="red"
               />
@@ -178,7 +192,7 @@ export default function Dashboard() {
 
           </div>
 
-          {/* RIGHT PANEL */}
+          {/* RIGHT */}
 
           <div className="col-span-8 space-y-6">
 
@@ -197,6 +211,8 @@ export default function Dashboard() {
             <SuggestionCard
               suggestions={suggestions}
             />
+
+            <History refresh={refreshHistory} />
 
           </div>
 

@@ -1,62 +1,38 @@
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/layout/Sidebar";
+import Topbar from "../components/layout/Topbar";
 
-export default function Dashboard() {
-  return (
-    <div className="min-h-screen bg-slate-100">
+export default function Dashboard(){
 
-      <Navbar />
+return(
 
-      <div className="max-w-7xl mx-auto p-8">
+<div className="flex">
 
-        <h1 className="text-4xl font-bold mb-8">
-          Resume Dashboard
-        </h1>
+<Sidebar/>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className="flex-1 bg-slate-100 min-h-screen">
 
-          <div className="bg-white shadow-lg rounded-xl p-6">
+<Topbar/>
 
-            <h2 className="text-xl font-semibold mb-3">
-              ATS Score
-            </h2>
+<div className="p-10">
 
-            <h1 className="text-5xl text-green-600 font-bold">
-              82%
-            </h1>
+<h2 className="text-5xl font-bold">
 
-          </div>
+Welcome 👋
 
-          <div className="bg-white shadow-lg rounded-xl p-6">
+</h2>
 
-            <h2 className="text-xl font-semibold mb-3">
-              Resume Match
-            </h2>
+<p className="mt-3 text-gray-500">
 
-            <h1 className="text-5xl text-blue-600 font-bold">
-              76%
-            </h1>
+Let's analyze your resume.
 
-          </div>
+</p>
 
-          <div className="bg-white shadow-lg rounded-xl p-6">
+</div>
 
-            <h2 className="text-xl font-semibold mb-3">
-              Skills Found
-            </h2>
+</div>
 
-            <ul className="space-y-2">
-              <li>Python</li>
-              <li>React</li>
-              <li>Flask</li>
-              <li>MongoDB</li>
-            </ul>
+</div>
 
-          </div>
+)
 
-        </div>
-
-      </div>
-
-    </div>
-  );
 }

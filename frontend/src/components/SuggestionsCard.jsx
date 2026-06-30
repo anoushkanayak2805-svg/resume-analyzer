@@ -1,17 +1,21 @@
-export default function SuggestionsCard({ suggestions }) {
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+import React from "react";
 
-      <h2 className="text-xl font-bold mb-4">
+export default function SuggestionCard({ suggestions }) {
+  return (
+    <div className="bg-[#111827] rounded-xl p-6">
+
+      <h2 className="text-xl font-bold mb-5">
         AI Suggestions
       </h2>
 
       <ul className="space-y-3">
 
         {suggestions.map((item, index) => (
+
           <li key={index}>
             ✅ {item}
           </li>
+
         ))}
 
       </ul>

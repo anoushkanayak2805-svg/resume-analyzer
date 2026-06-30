@@ -1,10 +1,11 @@
+import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
 
-# connect to local MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+load_dotenv()
 
-# database name
+client = MongoClient(os.getenv("MONGO_URI"))
+
 db = client["resume_analyzer"]
 
-# collection to store resumes
 collection = db["resumes"]

@@ -3,6 +3,7 @@ import ATSCard from "../components/ATSCard";
 import MatchCard from "../components/MatchCard";
 import SkillsCard from "../components/SkillsCard";
 import SuggestionsCard from "../components/SuggestionsCard";
+import StatsCard from "../components/StatsCard";
 
 export default function Dashboard() {
 
@@ -21,6 +22,13 @@ export default function Dashboard() {
     "Add certifications"
   ];
 
+  const missingSkills = [
+    "Docker",
+    "AWS",
+    "Kubernetes",
+    "Redis"
+  ];
+
   return (
     <div className="min-h-screen bg-slate-100">
 
@@ -28,10 +36,34 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto p-8">
 
-        <h1 className="text-4xl font-bold mb-8">
-          Resume Dashboard
+        <h1 className="text-4xl font-bold text-slate-800 mb-8">
+          AI Resume Dashboard
         </h1>
 
+        {/* Top Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+          <StatsCard
+            title="Skills Found"
+            value={skills.length}
+            color="#22c55e"
+          />
+
+          <StatsCard
+            title="Missing Skills"
+            value={missingSkills.length}
+            color="#ef4444"
+          />
+
+          <StatsCard
+            title="Suggestions"
+            value={suggestions.length}
+            color="#3b82f6"
+          />
+
+        </div>
+
+        {/* ATS & Match */}
         <div className="grid md:grid-cols-2 gap-6">
 
           <ATSCard score={84} />
@@ -40,6 +72,7 @@ export default function Dashboard() {
 
         </div>
 
+        {/* Skills */}
         <div className="grid md:grid-cols-2 gap-6 mt-6">
 
           <SkillsCard skills={skills} />
