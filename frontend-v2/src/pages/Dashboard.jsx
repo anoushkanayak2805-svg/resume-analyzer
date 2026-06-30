@@ -33,6 +33,8 @@ export default function Dashboard() {
 
   const [refreshHistory, setRefreshHistory] = useState(false);
 
+  // ---------------- Upload Resume ----------------
+
   async function uploadResume(file) {
 
     if (!file) return;
@@ -54,11 +56,21 @@ export default function Dashboard() {
 
       console.error(err);
 
-      alert("Upload Failed");
+      if (err.response) {
+
+        alert(JSON.stringify(err.response.data));
+
+      } else {
+
+        alert(err.message);
+
+      }
 
     }
 
   }
+
+  // ---------------- Analyze Resume ----------------
 
   async function analyzeResume() {
 
@@ -88,16 +100,12 @@ export default function Dashboard() {
       const data = res.data;
 
       setAtsScore(Number(data.ats_score) || 0);
-
       setMatchScore(Number(data.match_score) || 0);
 
       setMatchedSkills(data.matched_keywords || []);
-
       setMissingSkills(data.missing_keywords || []);
-
       setSuggestions(data.suggestions || []);
 
-      // Refresh History
       setRefreshHistory(prev => !prev);
 
       alert("✅ Analysis Complete");
@@ -112,13 +120,45 @@ export default function Dashboard() {
 
       } else {
 
-        alert("Analysis Failed");
+        alert(err.message);
 
       }
 
     } finally {
 
       setLoading(false);
+
+    }
+
+  }
+
+  // ---------------- Download Report ----------------
+
+  function handleDownload() {
+
+    if (atsScore === 0) {
+
+      alert("Please analyze your resume first.");
+
+      return;
+
+    }
+
+    try {
+
+      downloadReport(
+        atsScore,
+        matchScore,
+        matchedSkills,
+        missingSkills,
+        suggestions
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert(err.message);
 
     }
 
@@ -136,7 +176,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-12 gap-8 p-8">
 
-          {/* LEFT */}
+          {/* LEFT PANEL */}
 
           <div className="col-span-4 space-y-6">
 
@@ -145,27 +185,14 @@ export default function Dashboard() {
             <button
               onClick={analyzeResume}
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 font-bold"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 font-bold transition"
             >
               {loading ? "Analyzing..." : "Analyze Resume"}
             </button>
 
             <button
-              disabled={atsScore === 0}
-              onClick={() =>
-                downloadReport(
-                  atsScore,
-                  matchScore,
-                  matchedSkills,
-                  missingSkills,
-                  suggestions
-                )
-              }
-              className={`w-full rounded-xl py-4 font-bold ${
-                atsScore === 0
-                  ? "bg-gray-400 cursor-not-allowed text-white"
-                  : "bg-green-600 hover:bg-green-700 text-white"
-              }`}
+              onClick={handleDownload}
+              className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-4 font-bold transition"
             >
               📄 Download Report
             </button>
@@ -192,7 +219,7 @@ export default function Dashboard() {
 
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT PANEL */}
 
           <div className="col-span-8 space-y-6">
 

@@ -7,90 +7,162 @@ export function downloadReport(
   missingSkills,
   suggestions
 ) {
-  try {
-    const doc = new jsPDF();
+  const doc = new jsPDF();
 
-    let y = 20;
+  let y = 20;
 
-    doc.setFontSize(20);
-    doc.text("AI Resume Analysis Report", 20, y);
+  // ---------------- TITLE ----------------
 
-    y += 15;
+  doc.setFontSize(22);
+  doc.setTextColor(30, 64, 175);
+  doc.text("AI Resume Analysis Report", 20, y);
 
-    doc.setFontSize(14);
+  y += 18;
 
-    doc.text(`ATS Score: ${atsScore}%`, 20, y);
+  // ---------------- SCORES ----------------
+
+  doc.setFontSize(15);
+  doc.setTextColor(0, 0, 0);
+
+  doc.text(`ATS Score : ${atsScore}%`, 20, y);
+
+  y += 10;
+
+  doc.text(`Job Match : ${matchScore}%`, 20, y);
+
+  y += 18;
+
+  // ---------------- MATCHED SKILLS ----------------
+
+  doc.setFontSize(17);
+  doc.setTextColor(34, 139, 34);
+
+  doc.text("Matched Skills", 20, y);
+
+  y += 10;
+
+  doc.setFontSize(13);
+  doc.setTextColor(0, 0, 0);
+
+  if (matchedSkills.length === 0) {
+
+    doc.text("No matched skills found.", 25, y);
+
     y += 10;
 
-    doc.text(`Job Match: ${matchScore}%`, 20, y);
-    y += 15;
+  } else {
 
-    // Matched Skills
-    doc.setFontSize(16);
-    doc.text("Matched Skills", 20, y);
-    y += 10;
+    matchedSkills.forEach(skill => {
 
-    doc.setFontSize(12);
+      doc.text("• " + skill, 25, y);
 
-    if (matchedSkills.length === 0) {
-      doc.text("- None", 25, y);
       y += 8;
-    } else {
-      matchedSkills.forEach((skill) => {
-        doc.text(`- ${skill}`, 25, y);
-        y += 8;
-      });
-    }
 
-    y += 5;
+    });
 
-    // Missing Skills
-    doc.setFontSize(16);
-    doc.text("Missing Skills", 20, y);
-    y += 10;
-
-    doc.setFontSize(12);
-
-    if (missingSkills.length === 0) {
-      doc.text("- None", 25, y);
-      y += 8;
-    } else {
-      missingSkills.forEach((skill) => {
-        doc.text(`- ${skill}`, 25, y);
-        y += 8;
-      });
-    }
-
-    y += 5;
-
-    // Suggestions
-    doc.setFontSize(16);
-    doc.text("Suggestions", 20, y);
-    y += 10;
-
-    doc.setFontSize(12);
-
-    if (suggestions.length === 0) {
-      doc.text("- No suggestions", 25, y);
-      y += 8;
-    } else {
-      suggestions.forEach((item) => {
-        doc.text(`- ${item}`, 25, y);
-        y += 8;
-      });
-    }
-
-    y += 15;
-
-    doc.setFontSize(10);
-    doc.text("Generated using AI Resume Analyzer", 20, y);
-
-    doc.save("Resume_Analysis_Report.pdf");
-
-    console.log("PDF Download Successful");
-
-  } catch (err) {
-    console.error("PDF Error:", err);
-    alert("Failed to generate PDF. Check the browser console.");
   }
+
+  y += 8;
+
+  // ---------------- MISSING SKILLS ----------------
+
+  doc.setFontSize(17);
+  doc.setTextColor(220, 20, 60);
+
+  doc.text("Missing Skills", 20, y);
+
+  y += 10;
+
+  doc.setFontSize(13);
+  doc.setTextColor(0, 0, 0);
+
+  if (missingSkills.length === 0) {
+
+    doc.text("No missing skills.", 25, y);
+
+    y += 10;
+
+  } else {
+
+    missingSkills.forEach(skill => {
+
+      doc.text("• " + skill, 25, y);
+
+      y += 8;
+
+    });
+
+  }
+
+  y += 8;
+
+  // ---------------- AI SUGGESTIONS ----------------
+
+  doc.setFontSize(17);
+  doc.setTextColor(30, 64, 175);
+
+  doc.text("AI Suggestions", 20, y);
+
+  y += 10;
+
+  doc.setFontSize(13);
+  doc.setTextColor(0, 0, 0);
+
+  if (suggestions.length === 0) {
+
+    doc.text("No suggestions available.", 25, y);
+
+  } else {
+
+    suggestions.forEach(item => {
+
+      const lines = doc.splitTextToSize(
+        "• " + item,
+        160
+      );
+
+      doc.text(lines, 25, y);
+
+      y += lines.length * 8;
+
+      // Create a new page if needed
+      if (y > 270) {
+
+        doc.addPage();
+
+        y = 20;
+
+      }
+
+    });
+
+  }
+
+  y += 15;
+
+  // ---------------- FOOTER ----------------
+
+  doc.setDrawColor(200);
+
+  doc.line(20, y, 190, y);
+
+  y += 10;
+
+  doc.setFontSize(11);
+
+  doc.setTextColor(120);
+
+  doc.text(
+    "Generated using AI Resume Analyzer",
+    20,
+    y
+  );
+
+  doc.text(
+    new Date().toLocaleString(),
+    135,
+    y
+  );
+
+  doc.save("Resume_Report.pdf");
 }
