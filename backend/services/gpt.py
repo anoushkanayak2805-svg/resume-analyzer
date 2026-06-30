@@ -4,59 +4,63 @@ def improve_resume(resume, job):
     job = job.lower()
 
     # -----------------------------
-    # Simple keyword extraction
+    # Extract keywords
     # -----------------------------
     job_keywords = set(job.split())
     resume_words = set(resume.split())
 
-    missing_keywords = list(job_keywords - resume_words)
     matched_keywords = list(job_keywords & resume_words)
+    missing_keywords = list(job_keywords - resume_words)
 
     # -----------------------------
-    # Score calculation
+    # ATS / Match Score
     # -----------------------------
     if len(job_keywords) == 0:
-        match_score = 0
+        ats_score = 0
     else:
-        match_score = round((len(matched_keywords) / len(job_keywords)) * 100, 2)
+        ats_score = round(
+            (len(matched_keywords) / len(job_keywords)) * 100
+        )
+
+    match_score = ats_score
 
     # -----------------------------
-    # Suggestions Engine
+    # Suggestions
     # -----------------------------
     suggestions = []
 
-    if match_score < 50:
-        suggestions.append("Improve keyword matching with job description")
+    if ats_score < 50:
+        suggestions.append(
+            "Improve keyword matching with the job description."
+        )
 
-    if len(missing_keywords) > 0:
-        suggestions.append(f"Add these keywords: {', '.join(missing_keywords[:10])}")
+    if missing_keywords:
+        suggestions.append(
+            "Add these keywords: " +
+            ", ".join(missing_keywords[:10])
+        )
 
-    suggestions.append("Use strong action verbs: built, designed, implemented")
-    suggestions.append("Add measurable impact (%, numbers, results)")
-    suggestions.append("Improve resume formatting for ATS readability")
+    suggestions.append(
+        "Use strong action verbs like Built, Developed, Designed."
+    )
 
-    # -----------------------------
-    # Final output (GPT-like format)
-    # -----------------------------
-    return f"""
-🤖 AI Resume Analysis (Free Mode)
+    suggestions.append(
+        "Add measurable achievements using numbers and percentages."
+    )
 
-1. ATS Score Improvement:
-Your ATS score is {match_score}%
+    suggestions.append(
+        "Improve ATS-friendly formatting."
+    )
 
-2. Missing Skills:
-{', '.join(missing_keywords[:15])}
+    suggestions.append(
+        "Keep your resume within one page if you are a fresher."
+    )
 
-3. Resume Summary Improvement:
-Make your summary more role-focused and add keywords from job description.
-
-4. Weak Areas:
-- Missing job-specific keywords
-- Lack of measurable achievements
-
-5. Suggestions:
-{chr(10).join(['- ' + s for s in suggestions])}
-
-6. Important Keywords:
-{', '.join(list(job_keywords)[:15])}
-"""
+    return {
+        "ats_score": ats_score,
+        "match_score": match_score,
+        "matched_keywords": matched_keywords,
+        "missing_keywords": missing_keywords,
+        "suggestions": suggestions,
+        "important_keywords": list(job_keywords)[:15]
+    }

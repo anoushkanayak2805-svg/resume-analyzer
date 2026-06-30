@@ -13,13 +13,12 @@ from db import collection
 load_dotenv()
 
 app = Flask(__name__)
-
-# Allow requests from Vercel
 CORS(app)
 
-# -----------------------------
-# Home Route
-# -----------------------------
+
+# ------------------------------------
+# Home
+# ------------------------------------
 @app.route("/")
 def home():
     return jsonify({
@@ -27,22 +26,39 @@ def home():
     })
 
 
-# -----------------------------
-# Upload Resume PDF
-# -----------------------------
+# ------------------------------------
+# Health Check
+# ------------------------------------
+@app.route("/health")
+def health():
+    return jsonify({
+        "status": "ok"
+    })
+
+
+# ------------------------------------
+# Upload Resume
+# ------------------------------------
 @app.route("/upload", methods=["POST"])
 def upload_resume():
+
     try:
+
         if "resume" not in request.files:
-            return jsonify({"error": "No file uploaded"}), 400
+            return jsonify({
+                "error": "No file uploaded"
+            }), 400
 
         file = request.files["resume"]
 
         text = ""
 
         with pdfplumber.open(file) as pdf:
+
             for page in pdf.pages:
+
                 page_text = page.extract_text()
+
                 if page_text:
                     text += page_text + "\n"
 
@@ -51,18 +67,20 @@ def upload_resume():
         })
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 500
 
 
-# -----------------------------
-# Skill Extraction
-# -----------------------------
+# ------------------------------------
+# Extract Skills
+# ------------------------------------
 @app.route("/analyze", methods=["POST"])
 def analyze():
 
     try:
+
         data = request.get_json()
 
         text = data.get("text", "")
@@ -74,18 +92,20 @@ def analyze():
         })
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 500
 
 
-# -----------------------------
-# Resume Match
-# -----------------------------
+# ------------------------------------
+# Match Score
+# ------------------------------------
 @app.route("/match", methods=["POST"])
 def match():
 
     try:
+
         data = request.get_json()
 
         resume = data.get("resume", "")
@@ -98,18 +118,20 @@ def match():
         })
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 500
 
 
-# -----------------------------
+# ------------------------------------
 # ATS Score
-# -----------------------------
+# ------------------------------------
 @app.route("/ats", methods=["POST"])
 def ats():
 
     try:
+
         data = request.get_json()
 
         resume = data.get("resume", "")
@@ -140,18 +162,20 @@ def ats():
         })
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 500
 
 
-# -----------------------------
+# ------------------------------------
 # Suggestions
-# -----------------------------
+# ------------------------------------
 @app.route("/suggest", methods=["POST"])
 def suggest():
 
     try:
+
         data = request.get_json()
 
         resume = data.get("resume", "")
@@ -170,52 +194,52 @@ def suggest():
         })
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 500
 
 
-# -----------------------------
-# AI Resume Feedback
-# -----------------------------
+# ------------------------------------
+# AI Resume Analyzer
+# ------------------------------------
 @app.route("/ai", methods=["POST"])
 def ai():
 
     try:
+
         data = request.get_json()
 
         resume = data.get("resume", "")
         job = data.get("job", "")
 
-        if resume.strip() == "" or job.strip() == "":
+        if not resume.strip() or not job.strip():
+
             return jsonify({
                 "error": "Resume and Job Description are required."
             }), 400
 
-        feedback = improve_resume(
-            resume,
-            job
-        )
+        result = improve_resume(resume, job)
 
-        return jsonify({
-            "success": True,
-            "feedback": feedback
-        })
+        return jsonify(result)
 
     except Exception as e:
+
+        print("AI ERROR:", e)
+
         return jsonify({
-            "success": False,
             "error": str(e)
         }), 500
 
 
-# -----------------------------
+# ------------------------------------
 # History
-# -----------------------------
+# ------------------------------------
 @app.route("/history", methods=["GET"])
 def history():
 
     try:
+
         history = list(
             collection.find(
                 {},
@@ -226,25 +250,17 @@ def history():
         return jsonify(history)
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 500
 
 
-# -----------------------------
-# Health Check
-# -----------------------------
-@app.route("/health")
-def health():
-    return jsonify({
-        "status": "ok"
-    })
-
-
-# -----------------------------
-# Run App
-# -----------------------------
+# ------------------------------------
+# Run
+# ------------------------------------
 if __name__ == "__main__":
+
     app.run(
         host="0.0.0.0",
         port=5000,
